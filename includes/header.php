@@ -1,4 +1,5 @@
 <?php
+
 // Get user info for header display
 $user_id = $_SESSION['user_id'];
 $user_sql = "SELECT * FROM employees WHERE user_id = '$user_id'";

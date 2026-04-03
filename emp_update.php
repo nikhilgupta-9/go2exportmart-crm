@@ -28,5 +28,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $stmt->execute();
 
-    header("Location: employees.php");
+    header("Location: employee.php");
 }

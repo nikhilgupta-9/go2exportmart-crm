@@ -273,7 +273,9 @@ $total_revenue = $conn->query("SELECT SUM(amount) as total FROM customerleads WH
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php while ($emp = $employees->fetch_assoc()) { 
+                                    <?php
+                                    $sno = 1;
+                                     while ($emp = $employees->fetch_assoc()) { 
                                         $status_class = '';
                                         $status_text = '';
                                         if ($emp['status'] == 1) {
@@ -301,7 +303,7 @@ $total_revenue = $conn->query("SELECT SUM(amount) as total FROM customerleads WH
                                             : "https://ui-avatars.com/api/?name=" . urlencode($emp['user_name']) . "&background=667eea&color=fff&size=100&bold=true";
                                     ?>
                                         <tr data-status="<?= $emp['status'] ?>" data-grade="<?= $emp['grade_level'] ?>">
-                                            <td><?= str_pad($emp['emp_id'], 4, '0', STR_PAD_LEFT); ?></td>
+                                            <td><?= str_pad($sno++, 3, '0', STR_PAD_LEFT); ?></td>
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <img src="<?= $imgPath ?>" alt="User Image" class="employee-avatar me-2">

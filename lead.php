@@ -25,27 +25,27 @@ if ($level == 4) {
     // Level 4: Agents - Only their assigned leads
     if (isset($_GET['leadType']) && $_GET['leadType'] != "All Leads") {
         $type = mysqli_real_escape_string($conn, $_GET['leadType']);
-        $lead_ftch_sql = "SELECT * FROM `customerleads` WHERE `assigned_to` = '$user_id' AND `status` = '$type' AND (`matelize` = '0' OR `matelize` IS NULL) AND `status` != 'Block'";
+        $lead_ftch_sql = "SELECT * FROM `customerleads` WHERE `assigned_to` = '$user_id' AND `status` = '$type' AND (`matelize` = '0' OR `matelize` IS NULL) AND `status` != 'Block' order by sno desc";
     } else {
-        $lead_ftch_sql = "SELECT * FROM `customerleads` WHERE `assigned_to` = '$user_id' AND (`matelize` = '0' OR `matelize` IS NULL) AND `status` != 'Block'";
+        $lead_ftch_sql = "SELECT * FROM `customerleads` WHERE `assigned_to` = '$user_id' AND (`matelize` = '0' OR `matelize` IS NULL) AND `status` != 'Block' order by sno desc";
         $type = "All Leads";
     }
 } elseif ($level == 3) {
     // Level 3: Team Leaders - Their team's leads
     if (isset($_GET['leadType']) && $_GET['leadType'] != "All Leads") {
         $type = mysqli_real_escape_string($conn, $_GET['leadType']);
-        $lead_ftch_sql = "SELECT * FROM `customerleads` WHERE `reporting` = '$user_id' AND `status` = '$type' AND (`matelize` = '0' OR `matelize` IS NULL)";
+        $lead_ftch_sql = "SELECT * FROM `customerleads` WHERE `reporting` = '$user_id' AND `status` = '$type' AND (`matelize` = '0' OR `matelize` IS NULL) order by sno desc";
     } else {
-        $lead_ftch_sql = "SELECT * FROM `customerleads` WHERE `reporting` = '$user_id' AND (`matelize` = '0' OR `matelize` IS NULL)";
+        $lead_ftch_sql = "SELECT * FROM `customerleads` WHERE `reporting` = '$user_id' AND (`matelize` = '0' OR `matelize` IS NULL) order by sno desc";
         $type = "All Leads";
     }
 } else {
     // Level 1 & 2: Admin & Managers - All leads
     if (isset($_GET['leadType']) && $_GET['leadType'] != "All Leads") {
         $type = mysqli_real_escape_string($conn, $_GET['leadType']);
-        $lead_ftch_sql = "SELECT * FROM `customerleads` WHERE `status` = '$type' AND (`matelize` = '0' OR `matelize` IS NULL)";
+        $lead_ftch_sql = "SELECT * FROM `customerleads` WHERE `status` = '$type' AND (`matelize` = '0' OR `matelize` IS NULL) order by sno desc";
     } else {
-        $lead_ftch_sql = "SELECT * FROM `customerleads` WHERE (`matelize` = '0' OR `matelize` IS NULL)";
+        $lead_ftch_sql = "SELECT * FROM `customerleads` WHERE (`matelize` = '0' OR `matelize` IS NULL) order by sno desc";
         $type = "All Leads";
     }
 }
@@ -90,24 +90,24 @@ $stats = mysqli_fetch_assoc($stats_result);
     <title>Lead Management | GO2EXPORT MART</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php include_once "includes/link.php"; ?>
-    
+
     <style>
         .stat-card {
             background: white;
             border-radius: 16px;
             padding: 20px;
             transition: all 0.3s;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             height: 100%;
             position: relative;
             overflow: hidden;
         }
-        
+
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
-        
+
         .stat-icon {
             width: 48px;
             height: 48px;
@@ -117,19 +117,19 @@ $stats = mysqli_fetch_assoc($stats_result);
             justify-content: center;
             font-size: 24px;
         }
-        
+
         .stat-value {
             font-size: 28px;
             font-weight: bold;
             margin-bottom: 5px;
         }
-        
+
         .stat-label {
             color: #6c757d;
             font-size: 13px;
             margin-bottom: 0;
         }
-        
+
         .lead-status-badge {
             padding: 5px 12px;
             border-radius: 20px;
@@ -137,67 +137,61 @@ $stats = mysqli_fetch_assoc($stats_result);
             font-weight: 500;
             display: inline-block;
         }
-        
+
         .status-fresh { background: #e3f2fd; color: #1976d2; }
         .status-followup { background: #fff3e0; color: #f57c00; }
         .status-positive { background: #e8f5e9; color: #388e3c; }
         .status-committed { background: #e1f5fe; color: #0288d1; }
         .status-not-interested { background: #ffebee; color: #d32f2f; }
-        
+
         .action-buttons .btn {
             margin: 2px;
             padding: 4px 8px;
             font-size: 12px;
         }
-        
+
         .table-container {
             background: white;
             border-radius: 16px;
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
-        
+
         .filter-section {
             background: white;
             padding: 20px;
             border-radius: 16px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
-        
+
         .filter-btn {
             transition: all 0.3s;
         }
-        
+
         .filter-btn:hover {
             transform: translateY(-2px);
         }
-        
+
         .bulk-actions {
             background: white;
             padding: 15px 20px;
             border-radius: 16px;
             margin-top: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             display: none;
             animation: slideUp 0.3s ease-out;
         }
-        
+
         .bulk-actions.show {
             display: block;
         }
-        
+
         @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        
+
         .custom-notification {
             position: fixed;
             top: 20px;
@@ -206,18 +200,12 @@ $stats = mysqli_fetch_assoc($stats_result);
             min-width: 300px;
             animation: slideInRight 0.3s ease-out;
         }
-        
+
         @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
-        
+
         .avatar-sm {
             width: 32px;
             height: 32px;
@@ -226,35 +214,41 @@ $stats = mysqli_fetch_assoc($stats_result);
             justify-content: center;
             border-radius: 50%;
         }
-        
+
         @media (max-width: 768px) {
-            .stat-card {
-                margin-bottom: 15px;
-            }
-            .table-container {
-                overflow-x: auto;
-                padding: 15px;
-            }
-            .filter-section .btn {
-                margin-bottom: 8px;
-            }
+            .stat-card { margin-bottom: 15px; }
+            .table-container { overflow-x: auto; padding: 15px; }
+            .filter-section .btn { margin-bottom: 8px; }
         }
-        
+
         .dataTables_wrapper .dataTables_paginate .paginate_button {
             padding: 0.375rem 0.75rem;
             margin: 0 2px;
             border-radius: 8px;
         }
-        
+
         .dataTables_wrapper .dataTables_filter input {
             border: 1px solid #dee2e6;
             border-radius: 8px;
             padding: 6px 12px;
         }
-        
+
         .table > :not(caption) > * > * {
             padding: 12px 15px;
             vertical-align: middle;
+        }
+        
+        .comment-badge {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .comment-badge:hover {
+            transform: scale(1.05);
+        }
+        
+        .modal-lg-custom {
+            max-width: 800px;
         }
     </style>
 </head>
@@ -384,23 +378,26 @@ $stats = mysqli_fetch_assoc($stats_result);
                             <thead class="table-light">
                                 <tr>
                                     <th width="30"><input type="checkbox" id="selectAll" class="lead-checkbox"></th>
+                                    <th>S No.</th>
                                     <th>Mobile No.</th>
                                     <th>Customer Name</th>
                                     <th>Company</th>
                                     <th>Email</th>
                                     <th>Assigned To</th>
                                     <th>Status</th>
+                                    <th width="70">History</th>
                                     <th width="150">Actions</th>
-                                </tr>
-                            </thead>
+                                </thead>
                             <tbody>
                                 <?php if ($total_leads > 0): ?>
-                                    <?php while ($lead_row = mysqli_fetch_assoc($lead_result)): 
+                                    <?php 
+                                    $sno = 1;
+                                    while ($lead_row = mysqli_fetch_assoc($lead_result)):
                                         $customerId = $lead_row['sno'];
                                         $status = $lead_row['status'];
                                         $statusClass = '';
-                                        
-                                        switch($status) {
+
+                                        switch ($status) {
                                             case 'Fresh Lead': $statusClass = 'status-fresh'; break;
                                             case 'Follow Up': $statusClass = 'status-followup'; break;
                                             case 'Positive': $statusClass = 'status-positive'; break;
@@ -408,81 +405,97 @@ $stats = mysqli_fetch_assoc($stats_result);
                                             case 'Not Interested': $statusClass = 'status-not-interested'; break;
                                             default: $statusClass = 'status-fresh';
                                         }
+                                        
+                                        // Get comment count from call_logs
+                                        $comment_count_sql = "SELECT COUNT(*) as total FROM call_logs WHERE lead_id = '$customerId'";
+                                        $comment_count_result = $conn->query($comment_count_sql);
+                                        $comment_count = $comment_count_result->fetch_assoc()['total'];
                                     ?>
-                                    <tr>
-                                        <td><input type="checkbox" class="lead-checkbox lead-select" value="<?php echo $customerId; ?>"></td>
-                                        <td>
-                                            <strong><?php echo htmlspecialchars($lead_row['customer_num']); ?></strong>
-                                            <?php if(!empty($lead_row['alt_number'])): ?>
-                                                <br><small class="text-muted">Alt: <?php echo htmlspecialchars($lead_row['alt_number']); ?></small>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar-sm bg-primary bg-opacity-10 me-2">
-                                                    <span class="text-primary"><?php echo strtoupper(substr($lead_row['customer_name'], 0, 2)); ?></span>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-semibold"><?php echo htmlspecialchars($lead_row['customer_name']); ?></div>
-                                                    <small class="text-muted"><?php echo htmlspecialchars($lead_row['cust_state']); ?></small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td><?php echo htmlspecialchars($lead_row['cust_company'] ?: '—'); ?></td>
-                                        <td>
-                                            <?php if(!empty($lead_row['cust_mail'])): ?>
-                                                <a href="mailto:<?php echo htmlspecialchars($lead_row['cust_mail']); ?>" class="text-decoration-none">
-                                                    <i class="ti ti-mail"></i> <?php echo htmlspecialchars(substr($lead_row['cust_mail'], 0, 20)); ?>
-                                                </a>
-                                            <?php else: ?>
-                                                <span class="text-muted">—</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info bg-opacity-10 text-info">
-                                                <i class="ti ti-user"></i> <?php echo htmlspecialchars($lead_row['assigned_to']); ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="lead-status-badge <?php echo $statusClass; ?>">
-                                                <?php echo $status; ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <button onclick="quickAction('comment', <?php echo $customerId; ?>)" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Add Comment">
-                                                    <i class="ti ti-message-circle"></i>
-                                                </button>
-                                                
-                                                <button onclick="quickAction('status', <?php echo $customerId; ?>)" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="Update Status">
-                                                    <i class="ti ti-edit"></i>
-                                                </button>
-                                                
-                                                <?php if($status == "Committed"): ?>
-                                                    <button onclick="quickAction('matelize', <?php echo $customerId; ?>)" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" title="Matelize">
-                                                        <i class="ti ti-star"></i>
-                                                    </button>
-                                                    <button onclick="quickAction('proforma', <?php echo $customerId; ?>)" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="Create Proforma">
-                                                        <i class="ti ti-file-invoice"></i>
-                                                    </button>
+                                        <tr>
+                                            <td><input type="checkbox" class="lead-checkbox lead-select" value="<?php echo $customerId; ?>"></td>
+                                            <td><?= $sno++ ?></td>
+                                            <td>
+                                                <strong><?php echo htmlspecialchars($lead_row['customer_num']); ?></strong>
+                                                <?php if (!empty($lead_row['alt_number'])): ?>
+                                                    <br><small class="text-muted">Alt: <?php echo htmlspecialchars($lead_row['alt_number']); ?></small>
                                                 <?php endif; ?>
-                                                
-                                                <?php if($level < 4): ?>
-                                                    <a href="edit_customer.php?customerID=<?php echo $customerId; ?>" class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" title="Edit Lead">
-                                                        <i class="ti ti-edit"></i>
+                                             </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm bg-primary bg-opacity-10 me-2">
+                                                        <span class="text-primary"><?php echo strtoupper(substr($lead_row['customer_name'], 0, 2)); ?></span>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-semibold"><?php echo htmlspecialchars($lead_row['customer_name']); ?></div>
+                                                        <small class="text-muted"><?php echo htmlspecialchars($lead_row['cust_state']); ?></small>
+                                                    </div>
+                                                </div>
+                                             </td>
+                                            <td><?php echo htmlspecialchars($lead_row['cust_company'] ?: '—'); ?></td>
+                                            <td>
+                                                <?php if (!empty($lead_row['cust_mail'])): ?>
+                                                    <a href="mailto:<?php echo htmlspecialchars($lead_row['cust_mail']); ?>" class="text-decoration-none">
+                                                        <i class="ti ti-mail"></i> <?php echo htmlspecialchars(substr($lead_row['cust_mail'], 0, 20)); ?>
                                                     </a>
+                                                <?php else: ?>
+                                                    <span class="text-muted">—</span>
                                                 <?php endif; ?>
-                                                
-                                                <button onclick="viewLeadDetails(<?php echo $customerId; ?>)" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="View Details">
-                                                    <i class="ti ti-eye"></i>
+                                             </td>
+                                            <td>
+                                                <span class="badge bg-info bg-opacity-10 text-info">
+                                                    <i class="ti ti-user"></i> <?php echo htmlspecialchars($lead_row['assigned_to']); ?>
+                                                </span>
+                                             </td>
+                                            <td>
+                                                <span class="lead-status-badge <?php echo $statusClass; ?>">
+                                                    <?php echo $status; ?>
+                                                </span>
+                                             </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-secondary comment-badge" onclick="viewCallHistory(<?php echo $customerId; ?>)" data-bs-toggle="tooltip" title="View Call History">
+                                                    <i class="ti ti-history"></i> <?php echo $comment_count; ?>
                                                 </button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                             </td>
+                                            <td>
+                                                <div class="action-buttons">
+                                                    <button onclick="quickAction('comment', <?php echo $customerId; ?>)" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Add Call Log">
+                                                        <i class="ti ti-phone-call"></i>
+                                                        <?php if ($comment_count > 0): ?>
+                                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 8px;">
+                                                                <?php echo $comment_count; ?>
+                                                            </span>
+                                                        <?php endif; ?>
+                                                    </button>
+
+                                                    <button onclick="quickAction('status', <?php echo $customerId; ?>)" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="Update Status">
+                                                        <i class="ti ti-edit"></i>
+                                                    </button>
+
+                                                    <?php if ($status == "Committed"): ?>
+                                                        <button onclick="quickAction('matelize', <?php echo $customerId; ?>)" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" title="Matelize">
+                                                            <i class="ti ti-star"></i>
+                                                        </button>
+                                                        <button onclick="quickAction('proforma', <?php echo $customerId; ?>)" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="Create Proforma">
+                                                            <i class="ti ti-file-invoice"></i>
+                                                        </button>
+                                                    <?php endif; ?>
+
+                                                    <?php if ($level < 4): ?>
+                                                        <a href="edit_customer.php?customerID=<?php echo $customerId; ?>" class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" title="Edit Lead">
+                                                            <i class="ti ti-edit"></i>
+                                                        </a>
+                                                    <?php endif; ?>
+
+                                                    <button onclick="viewLeadDetails(<?php echo $customerId; ?>)" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="View Details">
+                                                        <i class="ti ti-eye"></i>
+                                                    </button>
+                                                </div>
+                                             </td>
+                                         </tr>
                                     <?php endwhile; ?>
                                 <?php else: ?>
                                     <tr>
-                                        <td colspan="8" class="text-center py-5">
+                                        <td colspan="9" class="text-center py-5">
                                             <i class="ti ti-inbox fs-48 text-muted"></i>
                                             <h5 class="mt-3">No Leads Found</h5>
                                             <p class="text-muted">Click "Create New Lead" to get started.</p>
@@ -510,8 +523,8 @@ $stats = mysqli_fetch_assoc($stats_result);
                                     <option value="">Assign to...</option>
                                     <?php
                                     $agent_sql = $conn->query("SELECT * FROM `employees` WHERE `grade_level` = '4' AND `department` = 'Sales' AND `status` = 1");
-                                    while($agentname = mysqli_fetch_assoc($agent_sql)){
-                                        echo '<option value="'. $agentname['user_id'] .'">'. htmlspecialchars($agentname['user_name']) .'</option>';
+                                    while ($agentname = mysqli_fetch_assoc($agent_sql)) {
+                                        echo '<option value="' . $agentname['user_id'] . '">' . htmlspecialchars($agentname['user_name']) . '</option>';
                                     }
                                     ?>
                                 </select>
@@ -539,6 +552,23 @@ $stats = mysqli_fetch_assoc($stats_result);
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="leadDetailsContent">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call History Modal -->
+    <div class="modal fade" id="callHistoryModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Call History</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="callHistoryContent">
                     <div class="text-center py-4">
                         <div class="spinner-border text-primary"></div>
                     </div>
@@ -611,12 +641,12 @@ $stats = mysqli_fetch_assoc($stats_result);
         $(document).ready(function() {
             // Initialize tooltips
             $('[data-bs-toggle="tooltip"]').tooltip();
-            
-            // Initialize DataTable
-            if ($('#leadsTable tbody tr').length > 1) {
-                $('#leadsTable').DataTable({
+
+            // Initialize DataTable with proper search
+            if ($('#leadsTable tbody tr').length > 0) {
+                var table = $('#leadsTable').DataTable({
                     pageLength: 25,
-                    order: [[0, 'desc']],
+                    order: [[1, 'desc']],
                     language: {
                         search: "Search:",
                         lengthMenu: "Show _MENU_ entries",
@@ -625,50 +655,50 @@ $stats = mysqli_fetch_assoc($stats_result);
                         emptyTable: "No leads found"
                     },
                     columnDefs: [
-                        { orderable: false, targets: [0, 7] }
+                        { orderable: false, targets: [0, 7, 8] }
                     ]
                 });
+                
+                // Custom search across multiple columns
+                $('#searchInput').on('keyup', function() {
+                    table.search(this.value).draw();
+                });
             }
-            
+
             // Select All functionality
             $('#selectAll').change(function() {
                 $('.lead-select').prop('checked', $(this).prop('checked'));
                 updateBulkActions();
             });
-            
+
             // Individual checkbox change
             $(document).on('change', '.lead-select', function() {
                 updateBulkActions();
                 $('#selectAll').prop('checked', $('.lead-select:checked').length === $('.lead-select').length);
             });
-            
-            // Search functionality
-            $('#searchInput').on('keyup', function() {
-                $('#leadsTable').DataTable().search($(this).val()).draw();
-            });
         });
-        
+
         function updateBulkActions() {
             const selectedCount = $('.lead-select:checked').length;
             const selectedIds = $('.lead-select:checked').map(function() {
                 return $(this).val();
             }).get().join(',');
-            
+
             $('#selectedCount').text(selectedCount);
             $('#transferLead').val(selectedIds);
             $('#bulkLeadIds').val(selectedIds);
-            
+
             if (selectedCount > 0) {
                 $('#bulkActions').addClass('show');
             } else {
                 $('#bulkActions').removeClass('show');
             }
         }
-        
+
         function viewLeadDetails(leadId) {
             $('#leadDetailsModal').modal('show');
             $('#leadDetailsContent').html('<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>');
-            
+
             $.ajax({
                 url: 'ajax/get-lead-details.php',
                 type: 'GET',
@@ -682,23 +712,23 @@ $stats = mysqli_fetch_assoc($stats_result);
                                 <div class="col-md-6">
                                     <h6 class="border-bottom pb-2 mb-3">Personal Information</h6>
                                     <table class="table table-sm">
-                                        <tr><th width="40%">Customer Name:</th><td><strong>${escapeHtml(lead.customer_name)}</strong></td></tr>
-                                        <tr><th>Mobile Number:</th><td>${escapeHtml(lead.customer_num)}</td></tr>
-                                        <tr><th>Alternate Number:</th><td>${escapeHtml(lead.alt_number) || '—'}</td></tr>
-                                        <tr><th>Email:</th><td>${escapeHtml(lead.cust_mail) || '—'}</td></tr>
-                                        <tr><th>State:</th><td>${escapeHtml(lead.cust_state) || '—'}</td></tr>
-                                        <tr><th>Pincode:</th><td>${escapeHtml(lead.cust_pincode) || '—'}</td></tr>
+                                         <tr><th width="40%">Customer Name:</th><td><strong>${escapeHtml(lead.customer_name)}</strong></td></tr>
+                                         <tr><th>Mobile Number:</th><td>${escapeHtml(lead.customer_num)}</td></tr>
+                                         <tr><th>Alternate Number:</th><td>${escapeHtml(lead.alt_number) || '—'}</td></tr>
+                                         <tr><th>Email:</th><td>${escapeHtml(lead.cust_mail) || '—'}</td></tr>
+                                         <tr><th>State:</th><td>${escapeHtml(lead.cust_state) || '—'}</td></tr>
+                                         <tr><th>Pincode:</th><td>${escapeHtml(lead.cust_pincode) || '—'}</td></tr>
                                     </table>
                                 </div>
                                 <div class="col-md-6">
                                     <h6 class="border-bottom pb-2 mb-3">Company & Business Info</h6>
                                     <table class="table table-sm">
-                                        <tr><th width="40%">Company Name:</th><td>${escapeHtml(lead.cust_company) || '—'}</td></tr>
-                                        <tr><th>Website:</th><td>${lead.website ? '<a href="http://'+escapeHtml(lead.website)+'" target="_blank">'+escapeHtml(lead.website)+'</a>' : '—'}</td></tr>
-                                        <tr><th>Address:</th><td>${escapeHtml(lead.cust_address) || '—'}</td></tr>
-                                        <tr><th>GST:</th><td>${escapeHtml(lead.GST) || '—'}</td></tr>
-                                        <tr><th>PAN:</th><td>${escapeHtml(lead.pan) || '—'}</td></tr>
-                                        <tr><th>Status:</th><td><span class="lead-status-badge status-${lead.status.toLowerCase().replace(' ', '-')}">${escapeHtml(lead.status)}</span></td></tr>
+                                         <tr><th width="40%">Company Name:</th><td>${escapeHtml(lead.cust_company) || '—'}</td></tr>
+                                         <tr><th>Website:</th><td>${lead.website ? '<a href="http://'+escapeHtml(lead.website)+'" target="_blank">'+escapeHtml(lead.website)+'</a>' : '—'}</td></tr>
+                                         <tr><th>Address:</th><td>${escapeHtml(lead.cust_address) || '—'}</td></tr>
+                                         <tr><th>GST:</th><td>${escapeHtml(lead.GST) || '—'}</td></tr>
+                                         <tr><th>PAN:</th><td>${escapeHtml(lead.pan) || '—'}</td></tr>
+                                         <tr><th>Status:</th><td><span class="lead-status-badge status-${lead.status.toLowerCase().replace(' ', '-')}">${escapeHtml(lead.status)}</span></td></tr>
                                     </table>
                                 </div>
                             </div>
@@ -707,11 +737,11 @@ $stats = mysqli_fetch_assoc($stats_result);
                                 <div class="col-12">
                                     <h6 class="mb-3">Financial Details</h6>
                                     <table class="table table-sm">
-                                        <tr><th width="30%">Amount:</th><td class="fw-bold text-success">₹${parseFloat(lead.amount).toLocaleString('en-IN')}</td></tr>
-                                        <tr><th>Discount:</th><td>₹${parseFloat(lead.discount).toLocaleString('en-IN')}</td></tr>
-                                        <tr><th>Balance Amount:</th><td class="fw-bold ${lead.bal_amt > 0 ? 'text-danger' : 'text-success'}">₹${parseFloat(lead.bal_amt).toLocaleString('en-IN')}</td></tr>
-                                        <tr><th>Payment Mode:</th><td>${escapeHtml(lead.pay_mode) || '—'}</td></tr>
-                                        <tr><th>Transaction ID:</th><td><code>${escapeHtml(lead.transaction) || '—'}</code></td></tr>
+                                         <tr><th width="30%">Amount:</th><td class="fw-bold text-success">₹${parseFloat(lead.amount).toLocaleString('en-IN')}</td></tr>
+                                         <tr><th>Discount:</th><td>₹${parseFloat(lead.discount).toLocaleString('en-IN')}</td></tr>
+                                         <tr><th>Balance Amount:</th><td class="fw-bold ${lead.bal_amt > 0 ? 'text-danger' : 'text-success'}">₹${parseFloat(lead.bal_amt).toLocaleString('en-IN')}</td></tr>
+                                         <tr><th>Payment Mode:</th><td>${escapeHtml(lead.pay_mode) || '—'}</td></tr>
+                                         <tr><th>Transaction ID:</th><td><code>${escapeHtml(lead.transaction) || '—'}</code></td></tr>
                                     </table>
                                 </div>
                             </div>
@@ -726,19 +756,91 @@ $stats = mysqli_fetch_assoc($stats_result);
                 }
             });
         }
-        
+
+        function viewCallHistory(leadId) {
+            $('#callHistoryModal').modal('show');
+            $('#callHistoryContent').html('<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>');
+
+            $.ajax({
+                url: 'ajax/get-call-history.php',
+                type: 'GET',
+                data: { lead_id: leadId },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success && response.data.length > 0) {
+                        let html = '<div class="timeline">';
+                        response.data.forEach(call => {
+                            html += `
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <strong>${escapeHtml(call.created_by)}</strong>
+                                                <small class="text-muted ms-2">${new Date(call.created_at).toLocaleString()}</small>
+                                            </div>
+                                            ${call.call_duration ? `<span class="badge bg-info">Duration: ${call.call_duration}</span>` : ''}
+                                        </div>
+                                        <div class="mb-2">
+                                            <span class="badge bg-${call.call_status === 'positive' ? 'success' : (call.call_status === 'follow_up' ? 'warning' : 'secondary')}">
+                                                ${call.call_status.replace('_', ' ').toUpperCase()}
+                                            </span>
+                                            ${call.follow_up_date ? `<span class="badge bg-warning ms-2">Follow-up: ${new Date(call.follow_up_date).toLocaleDateString()}</span>` : ''}
+                                        </div>
+                                        <p class="mb-0">${escapeHtml(call.call_notes)}</p>
+                                        ${call.source ? `<small class="text-muted">Source: ${call.source}</small>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                        $('#callHistoryContent').html(html);
+                    } else {
+                        $('#callHistoryContent').html('<div class="text-center py-4"><i class="ti ti-phone-off fs-48 text-muted"></i><p class="mt-2">No call history found for this lead</p></div>');
+                    }
+                },
+                error: function() {
+                    $('#callHistoryContent').html('<div class="alert alert-danger">Error loading call history</div>');
+                }
+            });
+        }
+
         function quickAction(action, customerId) {
             $('#quickCustomerId').val(customerId);
-            
+
             if (action === 'comment') {
-                $('#quickActionTitle').text('Add Comment');
+                $('#quickActionTitle').text('Add Call Log');
                 $('#quickActionContent').html(`
                     <div class="mb-3">
-                        <label class="form-label">Comment / Notes</label>
-                        <textarea name="comment" class="form-control" rows="4" required placeholder="Enter your comment here..."></textarea>
+                        <label class="form-label">Call Status</label>
+                        <select name="call_status" class="form-select" required>
+                            <option value="">Select Status</option>
+                            <option value="call_picked">Call Picked</option>
+                            <option value="call_not_picked">Not Picked</option>
+                            <option value="call_busy">Busy</option>
+                            <option value="call_switched_off">Switched Off</option>
+                            <option value="call_wrong_number">Wrong Number</option>
+                            <option value="call_cut">Call Cut</option>
+                            <option value="positive">Positive</option>
+                            <option value="follow_up">Follow Up</option>
+                            <option value="committed">Committed</option>
+                            <option value="not_interested">Not Interested</option>
+                            <option value="payment_done">Payment Done</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Call Duration</label>
+                        <input type="text" name="call_duration" class="form-control" placeholder="e.g., 2:30 or 150 seconds">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Next Follow-up Date</label>
+                        <input type="date" name="follow_up_date" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Call Notes / Remarks</label>
+                        <textarea name="call_notes" class="form-control" rows="4" required placeholder="Enter call notes here..."></textarea>
                     </div>
                 `);
-                $('#quickActionForm').attr('action', 'comment.php');
+                $('#quickActionForm').attr('action', 'add_call_log.php');
             } else if (action === 'status') {
                 $('#quickActionTitle').text('Update Status');
                 $('#quickActionContent').html(`
@@ -794,7 +896,7 @@ $stats = mysqli_fetch_assoc($stats_result);
             
             $('#quickActionModal').modal('show');
         }
-        
+
         function bulkStatusUpdate() {
             const selectedCount = $('.lead-select:checked').length;
             if (selectedCount === 0) {
@@ -803,11 +905,11 @@ $stats = mysqli_fetch_assoc($stats_result);
             }
             $('#bulkStatusModal').modal('show');
         }
-        
+
         $('#bulkStatusForm').on('submit', function(e) {
             e.preventDefault();
             const formData = $(this).serialize();
-            
+
             $.ajax({
                 url: 'ajax/bulk-status-update.php',
                 type: 'POST',
@@ -829,7 +931,7 @@ $stats = mysqli_fetch_assoc($stats_result);
                 }
             });
         });
-        
+
         function showNotification(type, message) {
             const notification = $(`
                 <div class="custom-notification alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show" role="alert">
@@ -841,7 +943,7 @@ $stats = mysqli_fetch_assoc($stats_result);
             $('body').append(notification);
             setTimeout(() => notification.fadeOut(() => notification.remove()), 3000);
         }
-        
+
         function escapeHtml(str) {
             if (!str) return '';
             return String(str).replace(/[&<>]/g, function(m) {

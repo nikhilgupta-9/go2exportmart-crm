@@ -15,8 +15,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <div class="sidebar-logo">
         <div>
             <!-- Logo Normal -->
-            <a href="dashboard.php" class="logo logo-normal">
-                <img src="assets/img/logo.svg" alt="Logo">
+            <a href="dashboard.php" class="logo logo-normal p-1">
+                <img src="assets/img/logo-g2em.png" alt="Logo" style="max-width: 80%;">
             </a>
 
             <!-- Logo Small -->
@@ -46,21 +46,31 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
                 <!-- ── MAIN MENU ── -->
                 <li class="menu-title"><span>Main Menu</span></li>
-                <?php if ($grade < 2): ?>
-                    <li>
-                        <a href="admin-dashboard.php" class="<?= $current_page === 'admin-dashboard.php' ? 'active' : '' ?>">
-                            <i class="ti ti-dashboard"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-                <?php else: ?>
-                    <li>
-                        <a href="dashboard.php" class="<?= $current_page === 'dashboard.php' ? 'active' : '' ?>">
-                            <i class="ti ti-dashboard"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-                <?php endif; ?>
+                <li>
+                    <?php
+                    switch ($grade) {
+                        case 1:
+                            $dashboard_url = 'admin-dashboard.php';
+                            break;
+                        case 2:
+                            $dashboard_url = 'manager-dashboard.php';
+                            break;
+                        case 3:
+                            $dashboard_url = 'teamlead-dashboard.php';
+                            break;
+                        case 4:
+                            $dashboard_url = 'dashboard-sales.php';
+                            break;
+                        default:
+                            $dashboard_url = 'dashboard.php';
+                            break;
+                    }
+                    ?>
+                    <a href="<?php echo $dashboard_url; ?>" class="<?= $current_page === $dashboard_url ? 'active' : '' ?>">
+                        <i class="ti ti-dashboard"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
 
                 <!-- ── INFO ── (grade-based) -->
                 <?php if ($grade < 2 || $grade == 3): ?>
@@ -141,12 +151,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                     <span>My Team</span>
                                 </a>
                             </li>
-                            <li>
-                                <a href="team-alignment.php" class="<?= $current_page === 'team-alignment.php' ? 'active' : '' ?>">
-                                    <i class="ti ti-layout-distribute-horizontal"></i>
-                                    <span>Team Alignment</span>
-                                </a>
-                            </li>
+                            <?php if ($grade < 3): ?>
+                                <li>
+                                    <a href="team-alignment.php" class="<?= $current_page === 'team-alignment.php' ? 'active' : '' ?>">
+                                        <i class="ti ti-layout-distribute-horizontal"></i>
+                                        <span>Team Alignment</span>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
                         </ul>
                     </li>
                 <?php endif; ?>
@@ -159,6 +171,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             <a href="lead.php" class="<?= $current_page === 'lead.php' && !isset($_GET['leadType']) ? 'active' : '' ?>">
                                 <i class="ti ti-chart-arcs"></i>
                                 <span>All Leads</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="allocated-leads.php"
+                                class="<?= ($current_page === 'allocated-leads.php') ? 'active' : '' ?>">
+                                <i class="ti ti-chart-bar"></i>
+                                <span>Meta Leads</span>
                             </a>
                         </li>
                         <li>
@@ -229,6 +248,39 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     </ul>
                 </li>
 
+                <!-- Sales Dashboard for Grade Level 4 -->
+                <?php if ($grade == 4): ?>
+                    <li class="menu-title"><span>Sales</span></li>
+                    <li>
+                        <ul>
+                            <li>
+                                <a href="dashboard-sales.php" class="<?= $current_page === 'dashboard-sales.php' ? 'active' : '' ?>">
+                                    <i class="ti ti-chart-pie"></i>
+                                    <span>My Dashboard</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                <?php endif; ?>
+
+                <!-- Settings Section (Only for Admin Grade 1) -->
+                <?php if ($grade == 1): ?>
+                    <li class="menu-title"><span>Settings</span></li>
+                    <li>
+                        <ul>
+                            <li class="submenu">
+                                <a href="javascript:void(0);">
+                                    <i class="ti ti-settings-2"></i><span>System Settings</span><span class="menu-arrow"></span>
+                                </a>
+                                <ul>
+                                    <li><a href="department-designation.php" class="<?= $current_page === 'department-designation.php' ? 'active' : '' ?>">Department & Designation</a></li>
+                                    <li><a href="lead-allocation.php" class="<?= $current_page === 'lead-allocation.php' ? 'active' : '' ?>">Lead Allocation</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                <?php endif; ?>
+
                 <!-- ── ACCOUNT ── -->
                 <li class="menu-title"><span>Account</span></li>
                 <li>
@@ -254,19 +306,33 @@ $current_page = basename($_SERVER['PHP_SELF']);
     }
 </style>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
 
-    const toggleBtn = document.getElementById("toggle_btn");
-    const sidebar = document.getElementById("sidebar");
+        const toggleBtn = document.getElementById("toggle_btn");
+        const sidebar = document.getElementById("sidebar");
 
-    toggleBtn.addEventListener("click", function () {
-        document.body.classList.toggle("mini-sidebar");
+        toggleBtn.addEventListener("click", function() {
+            document.body.classList.toggle("mini-sidebar");
 
-        // Mobile specific
-        if (window.innerWidth < 991) {
-            sidebar.classList.toggle("opened");
-        }
+            // Mobile specific
+            if (window.innerWidth < 991) {
+                sidebar.classList.toggle("opened");
+            }
+        });
+
     });
+</script>
+<script>
+    document.querySelectorAll(".submenu > a").forEach(link => {
+        link.addEventListener("click", function(e) {
+            e.preventDefault();
+            let submenu = this.nextElementSibling;
 
-});
+            if (submenu.style.display === "block") {
+                submenu.style.display = "none";
+            } else {
+                submenu.style.display = "block";
+            }
+        });
+    });
 </script>

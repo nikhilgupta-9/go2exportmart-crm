@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $userId = trim($_POST['userId']);
     $enteredPassword = trim($_POST['userPassword']);
     
-    // Sanitizing User ID to match your preg_replace logic
+    // Sanitizing User ID
     $newcheck = preg_replace('/[^A-Za-z0-9]/', '', $userId);
     
     if (empty($newcheck) || empty($enteredPassword)) {
@@ -48,21 +48,41 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                     $_SESSION['logged_in'] = true;
                     $_SESSION['login_time'] = time();
                     
-                    // Log the login activity (optional)
-                    $log_sql = $conn->prepare("INSERT INTO login_logs (user_id, login_time, ip_address) VALUES (?, NOW(), ?)");
-                    $ip_address = $_SERVER['REMOTE_ADDR'];
-                    $log_sql->bind_param("ss", $db_emp_id, $ip_address);
-                    $log_sql->execute();
-                    $log_sql->close();
+                    // Log the login activity (check if table exists first)
+                    $check_table = $conn->query("SHOW TABLES LIKE 'login_logs'");
+                    if ($check_table && $check_table->num_rows > 0) {
+                        $log_sql = $conn->prepare("INSERT INTO login_logs (user_id, login_time, ip_address) VALUES (?, NOW(), ?)");
+                        if ($log_sql) {
+                            $ip_address = $_SERVER['REMOTE_ADDR'];
+                            $log_sql->bind_param("ss", $db_emp_id, $ip_address);
+                            $log_sql->execute();
+                            $log_sql->close();
+                        }
+                    }
                     
                     // Redirect based on department and grade level
                     if ($db_department == "Support") {
                         header("Location: dashboard-support.php");
-                    } elseif ($db_grade_level == 1) {
-                        // Admin users can access admin dashboard
-                        header("Location: admin-dashboard.php");
-                    } else {
-                        header("Location: dashboard.php");
+                        exit;
+                    } 
+                    
+                    // Grade level based redirect
+                    switch ($db_grade_level) {
+                        case 1:
+                            header("Location: admin-dashboard.php");
+                            break;
+                        case 2:
+                            header("Location: manager-dashboard.php");
+                            break;
+                        case 3:
+                            header("Location: teamlead-dashboard.php");
+                            break;
+                        case 4:
+                            header("Location: dashboard.php");
+                            break;
+                        default:
+                            header("Location: dashboard.php");
+                            break;
                     }
                     exit;
                 } else {
@@ -85,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Login | Go 2 Export Mart</title>
+    <title>Login | GO2EXPORT MART</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <link rel="shortcut icon" href="assets/img/favicon.png" />
@@ -107,12 +127,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-        
-        .password-strength {
-            height: 3px;
-            margin-top: 5px;
-            transition: all 0.3s;
         }
         
         .btn-loading {
@@ -139,6 +153,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        
+       
     </style>
 </head>
 
@@ -152,13 +168,13 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                             <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST" class="vh-100 d-flex justify-content-between flex-column p-4 pb-0" id="loginForm">
                                 
                                 <div class="text-center mb-4 auth-logo">
-                                    <img src="assets/img/logo.svg" class="img-fluid" alt="Logo">
+                                    <img src="assets/img/logo-g2em.png" class="img-fluid" alt="Logo">
                                 </div>
                                 
                                 <div>
                                     <div class="mb-3">
                                         <h3 class="mb-2">Welcome Back</h3>
-                                        <p class="mb-0 text-muted">Access the CRMS panel using your credentials.</p>
+                                        <p class="mb-0 text-muted">Access your account using your credentials</p>
                                     </div>
                                     
                                     <?php if (!empty($error)) { ?>
@@ -209,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <p class="mb-0 text-center">New on our platform? <a href="register.html" class="text-primary fw-bold text-decoration-none">Create an account</a></p>
+                                        <p class="mb-0 text-center">New on our platform? <a href="register.php" class="text-primary fw-bold text-decoration-none">Create an account</a></p>
                                     </div>
                                     
                                     <div class="or-login text-center position-relative mb-3">
@@ -285,15 +301,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                 btn.addClass('btn-loading');
                 btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Signing in...');
                 btn.prop('disabled', true);
-                
-                // Remove loading state if form doesn't submit (like validation error)
-                setTimeout(function() {
-                    if (btn.hasClass('btn-loading')) {
-                        btn.removeClass('btn-loading');
-                        btn.html('<i class="ti ti-login me-2"></i>Sign In');
-                        btn.prop('disabled', false);
-                    }
-                }, 3000);
             });
             
             // Auto-hide alerts after 5 seconds
@@ -303,5 +310,4 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         });
     </script>
 </body>
-
 </html>

@@ -502,7 +502,7 @@ $unassigned_executives = $conn->query("SELECT user_id, user_name FROM employees 
                                 <select class="form-select" name="team_lead" required>
                                     <option value="">Select Team Lead</option>
                                     <?php 
-                                    $team_leaders = $conn->query("SELECT user_id, user_name FROM employees WHERE grade_level = 3 AND status = 1");
+                                    $team_leaders = $conn->query("SELECT user_id, user_name FROM employees WHERE grade_level = 3 OR 2 AND status = 1");
                                     while($tl = $team_leaders->fetch_assoc()): 
                                     ?>
                                         <option value="<?php echo $tl['user_id']; ?>"><?php echo htmlspecialchars($tl['user_name']); ?></option>

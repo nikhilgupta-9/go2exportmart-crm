@@ -377,6 +377,7 @@ if (isset($_SESSION['error_message'])) {
                             <table class="table table-hover" id="matelizeTable">
                                 <thead class="table-light">
                                     <tr>
+                                        <th>S No.</th>
                                         <th>Customer No.</th>
                                         <th>Customer Name</th>
                                         <th>Company</th>
@@ -390,7 +391,9 @@ if (isset($_SESSION['error_message'])) {
                                 </thead>
                                 <tbody>
                                     <?php if (!empty($customers_data)): ?>
-                                        <?php foreach ($customers_data as $customer): 
+                                        <?php
+                                        $sno = 1; 
+                                        foreach ($customers_data as $customer): 
                                             $balance = floatval($customer['bal_amt']);
                                             $paid = floatval($customer['paid_amount']);
                                             $total = floatval($customer['amount']);
@@ -410,6 +413,7 @@ if (isset($_SESSION['error_message'])) {
                                             }
                                         ?>
                                             <tr>
+                                                <td><?= $sno++ ?></td>
                                                 <td>
                                                     <strong><?php echo htmlspecialchars($customer['customer_num']); ?></strong>
                                                     <?php if (!empty($customer['alt_number'])): ?>
